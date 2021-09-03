@@ -11,11 +11,13 @@ admin.initializeApp({
   databaseURL: "https://besquare-chatroom-default-rtdb.firebaseio.com"
 });
 
-const port = process.env.PORT || 8000;
+const port = 5000; // process.env.PORT || 5000;
 
 const server = app.listen(port, function () {
     console.log("Listening on port", port);
 });
+
+// app.use(express.static("public"));
 
 const message_db = admin.database().ref("/messages");
 

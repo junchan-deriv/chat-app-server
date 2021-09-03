@@ -105,3 +105,6 @@ dist
 
 # Firebase scrt ky
 sdk_secret.json
+
+# Sample client app
+public
