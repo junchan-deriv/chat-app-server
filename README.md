@@ -69,7 +69,8 @@ socket.on("chat", function (data) {
 #### Get chat history
 
 ```javascript
-socket.emit("history", { from: "", to: "" }, function (response){
+// Get message history ranging from yesterday to right now (time format is UNIX timestamp in milliseconds)
+socket.emit("history", { from: Date.now() - 86400000 to: Date.now() }, function (response){
     console.log(response);
 })
 ```

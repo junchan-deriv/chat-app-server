@@ -1,6 +1,7 @@
 const express = require("express");
 const admin = require("firebase-admin");
 const socket = require("socket.io");
+require('dotenv').config()
 
 const app = express();
 
@@ -38,9 +39,26 @@ io.on("connection", socket => {
     });
 
     socket.on("history", (params, callback) => {
-        message_db.on("value", function(snapshot) {
-            const hist = Object.values(snapshot.val());
-            callback(hist);
-        })
+        if (params.from && params.to) {
+            message_db.orderByChild("time").startAt(params.from).endAt(params.to).on("value", function(snapshot) {
+                const hist = Object.values(snapshot.val());
+                callback(hist);
+            })
+        } else if (params.from) {
+            message_db.orderByChild("time").startAt(params.from).on("value", function(snapshot) {
+                const hist = Object.values(snapshot.val());
+                callback(hist);
+            })
+        } else if (params.to) {
+            message_db.orderByChild("time").endAt(params.to).on("value", function(snapshot) {
+                const hist = Object.values(snapshot.val());
+                callback(hist);
+            })
+        } else {
+            message_db.on("value", function(snapshot) {
+                const hist = Object.values(snapshot.val());
+                callback(hist);
+            })
+        }
     })
 });

@@ -108,3 +108,6 @@ sdk_secret.json
 
 # Sample client app
 public
+
+# Mac folder attributes
+.DS_Store
