@@ -15,7 +15,7 @@ A simple server for a chatroom that is limited to the following functionality:
         npm install socket.io-client
         ```
     - From a CDN (perfect if you are using static html)
-    Paste the following in the had tag of your `html` root file:
+    Paste the following in the head tag of your `html` root file:
         ```
         <script src="https://cdn.socket.io/3.1.3/socket.io.min.js" integrity="sha384-cPwlPLvBTa3sKAgddT6krw0cJat7egBga3DJepJyrLl4Q9/5WLra3rrnMcyTyOnh" crossorigin="anonymous"></script>
         ```
@@ -33,7 +33,7 @@ import socketIOClient from "socket.io-client";
 const socket = socketIOClient("http://besquare-chatroom.herokuapp.com");
 ```
 
-Now you can send and recieve:
+Now you can send and receive:
 
 ### Send a message
 
@@ -58,7 +58,7 @@ socket.on("chat", function (data) {
 socket.emit("typing", "Jonnyboi");
 ```
 
-#### Recieve "Typing..." event
+#### Receive "Typing..." event
 
 ```javascript
 socket.on("chat", function (data) {

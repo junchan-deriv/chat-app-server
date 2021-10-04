@@ -8,10 +8,10 @@ var serviceAccount = require("./sdk_secret.json");
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://besquare-chatroom-default-rtdb.firebaseio.com"
+  databaseURL: process.env.FIREBASE_URL
 });
 
-const port = 5000; // process.env.PORT || 5000;
+const port = process.env.PORT || 5000;
 
 const server = app.listen(port, function () {
     console.log("Listening on port", port);
