@@ -22,20 +22,31 @@ const server = app.listen(port, function () {
 
 const message_db = admin.database().ref("/messages");
 
-const io = socket(server);
+const io = socket(server, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+      }
+});
+
+io.on("error", () => {
+    
+})
 
 io.on("connection", socket => {
     socket.on("chat", data => {
         io.sockets.emit("chat", data);
-        message_db.push({
-            time: Date.now(),
-            username: data.username,
-            text: data.message
-        })
+        if (Object.values(data)) {
+            message_db.push({
+                time: Date.now(),
+                username: data.username ? data.username : "",
+                text: data.message? data.message : ""
+            })
+        }
     });
 
     socket.on("typing", data => {
-        socket.broadcast.emit("typing...", data)
+        socket.broadcast.emit("typing", data)
     });
 
     socket.on("history", (params, callback) => {

@@ -107,7 +107,7 @@ dist
 sdk_secret.json
 
 # Sample client app
-public
+# public
 
 # Mac folder attributes
 .DS_Store
