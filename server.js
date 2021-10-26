@@ -12,13 +12,13 @@ admin.initializeApp({
   databaseURL: process.env.FIREBASE_URL
 });
 
-const port = process.env.PORT || 5000;
+const port =  5000;
 
 const server = app.listen(port, function () {
     console.log("Listening on port", port);
 });
 
-// app.use(express.static("public"));
+app.use(express.static("public"));
 
 const message_db = admin.database().ref("/messages");
 
