@@ -22,7 +22,7 @@ A simple server for a chatroom that is limited to the following functionality:
 2. Connect to the server:
 
 ```js
-const socket = io.connect("http://besquare-chatroom.herokuapp.com");
+const socket = io.connect("http://localhost:5000");
 ```
 
 or if you're using node and/or react:
@@ -30,7 +30,7 @@ or if you're using node and/or react:
 ```js
 import socketIOClient from "socket.io-client";
 
-const socket = socketIOClient("http://besquare-chatroom.herokuapp.com");
+const socket = socketIOClient("http://localhost:5000");
 ```
 
 Now you can send and receive:
