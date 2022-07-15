@@ -9,10 +9,9 @@ var feedback = $("#feedback");
 
 //get the history
 socket.emit("history", {}, function (response) {
-  response.forEach((el) => {
-    output.append(
-      "<p><strong>" + el.username + ":</strong>" + el.text + "</p>"
-    );
+  response.forEach((data) => {
+    const html = `<p><strong >${data.username}:</strong>${data.text}</p>`;
+    output.append(html);
   });
   document.getElementById("chat-window").scrollTop = output[0].scrollHeight;
 });
@@ -21,27 +20,35 @@ socket.emit("history", {}, function (response) {
 socket.emit("auth", { token: window.token }, function (result) {
   if (!result) {
     alert("Cannot authenticate");
-    document.location.reload();
+    document.location.replace("/");
   }
 });
 
-//Emit event
-btn.on("click", function () {
+function sendMsg() {
   socket.emit("chat", {
     message: message.val(),
   });
   message.val("");
-});
+}
 
-message.keypress(function () {
-  socket.emit("typing");
+//Emit event
+btn.on("click", sendMsg);
+
+message.keypress(function (e) {
+  if (e.which == 13) {
+    sendMsg();
+  } else {
+    socket.emit("typing");
+  }
 });
 
 //Listen event
 socket.on("chat", function (data) {
-  output.append(
-    "<p><strong>" + data.username + ":</strong>" + data.message + "</p>"
-  );
+  const server = data.username === "SERVER";
+  const html = `<p><strong ${server ? 'class="server"' : ""}>${
+    data.username
+  }:</strong>${data.message}</p>`;
+  output.append(html);
   document.getElementById("chat-window").scrollTop = output[0].scrollHeight;
 });
 

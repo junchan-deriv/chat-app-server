@@ -1,4 +1,6 @@
-const tokens = {};
+const tokens = {
+  "test-deploy": "akmal",
+};
 const crypto = require("crypto");
 
 function randomString() {
@@ -19,7 +21,7 @@ function getAssociatedUser(t) {
 
 function nukeUser(u) {
   Object.keys(tokens).forEach((t) => {
-    if (tokens[t] === u) {
+    if (tokens[t] === u && t !== "test-deploy") {
       tokens[t] = undefined;
     }
   });

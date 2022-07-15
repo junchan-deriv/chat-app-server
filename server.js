@@ -133,14 +133,35 @@ io.on("error", () => {});
 
 const onlineUsers = {};
 
+function postAsUser(socket, data) {
+  data.username = socket.user_name;
+  io.sockets.emit("chat", data);
+  if (Object.values(data)) {
+    addMessage({
+      time: Date.now(),
+      username: socket.user_name,
+      text: data.message ? data.message : "",
+    });
+  }
+}
+
 function processSlashCommands(cmd, socket) {
-  switch (cmd.trim()) {
-    case "/help":
+  cmd = cmd.trim();
+  if (!cmd.startsWith("/")) {
+    return false;
+  }
+  cmd = cmd.substring(1);
+  switch (cmd) {
+    case "help":
       socket.emit("chat", serverMessage(`/online show online users`));
       socket.emit("chat", serverMessage(`/me show name of logged in user`));
       socket.emit("chat", serverMessage(`/help show this help message`));
-      return true;
-    case "/online":
+      socket.emit(
+        "chat",
+        serverMessage(`/genshin-emote post random genshin emote`)
+      );
+      break;
+    case "online":
       socket.emit(
         "chat",
         serverMessage(
@@ -149,18 +170,22 @@ function processSlashCommands(cmd, socket) {
             .join(", ")}`
         )
       );
-      return true;
-    case "/me":
+      break;
+    case "me":
       socket.emit("chat", serverMessage(`Your name is ${socket.user_name}`));
-      return true;
+      break;
+    case "genshin-emote":
+      const randomN = Math.floor((Math.random() * 1000) % 6) + 1;
+      postAsUser(socket, { message: `<div class="genshin-${randomN}"></div>` });
+      break;
+    default:
+      socket.emit(
+        "chat",
+        serverMessage(`Invalid command, type /help for available commands`)
+      );
+      break;
   }
-  if (cmd.trim().startsWith("/")) {
-    socket.emit(
-      "chat",
-      serverMessage(`Invalid command. Type /help for all possible commands`)
-    );
-    return true;
-  }
+  return true;
 }
 
 function enableNormalChat(socket) {
@@ -172,15 +197,13 @@ function enableNormalChat(socket) {
     if (processSlashCommands(data.message, socket)) {
       return;
     }
-    data.username = socket.user_name;
-    io.sockets.emit("chat", data);
-    if (Object.values(data)) {
-      addMessage({
-        time: Date.now(),
-        username: socket.user_name,
-        text: data.message ? data.message : "",
-      });
-    }
+    data.message = data.message
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+    postAsUser(socket, data);
   });
 
   socket.on("typing", () => {
