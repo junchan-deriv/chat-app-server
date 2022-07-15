@@ -14,6 +14,7 @@ socket.emit("history", {}, function (response) {
       "<p><strong>" + el.username + ":</strong>" + el.text + "</p>"
     );
   });
+  document.getElementById("chat-window").scrollTop = output[0].scrollHeight;
 });
 
 //authenticate with the system
@@ -41,7 +42,6 @@ socket.on("chat", function (data) {
   output.append(
     "<p><strong>" + data.username + ":</strong>" + data.message + "</p>"
   );
-  feedback.html("");
   document.getElementById("chat-window").scrollTop = output[0].scrollHeight;
 });
 

@@ -1,18 +1,29 @@
 const express = require("express");
 const socket = require("socket.io");
 const session = require("express-session");
+const fs = require("fs");
 const { addMessage, getLastMessages } = require("./firebase_binder");
-const { newToken, getAssociatedUser } = require("./tokens");
+const { newToken, getAssociatedUser, nukeUser } = require("./tokens");
 require("dotenv").config();
 
-const users = {
-  junchan: "123",
-  jiajet: "123",
-  afiq: "afiq",
-  vernyi: "vern",
-  derrick: "123",
-  yuuchin: "shontzu",
-};
+let users = {};
+
+function reloadUsers() {
+  let reloadedUsers = JSON.parse(
+    fs.readFileSync("./users.json", { encoding: "utf-8" })
+  );
+  //compare the list
+  Object.keys(reloadedUsers).forEach((u) => {
+    if (users[u] !== reloadedUsers[u]) {
+      //log it out
+      nukeUser(u);
+    }
+  });
+  console.log("Configuration loaded");
+  users = reloadedUsers;
+}
+
+reloadUsers();
 
 const app = express();
 
@@ -40,7 +51,7 @@ const form = `<form method="POST">
 
 app.get("/", (req, res) => {
   if (req.session.user) {
-    res.redirect("/chat.html").end();
+    res.status(301).redirect("/chat.html");
     return;
   }
   res.status(200).type("html").end(`
@@ -86,6 +97,11 @@ app.use((req, res, next) => {
 
 app.use(express.static("public"));
 
+app.get("/logout", (req, res) => {
+  req.session.destroy();
+  res.status(301).redirect("/");
+});
+
 function getIP(req) {
   let ip = req.connection.localAddress;
   if (ip.includes(":")) {
@@ -115,8 +131,47 @@ const io = socket(server, {
 
 io.on("error", () => {});
 
+const onlineUsers = {};
+
+function processSlashCommands(cmd, socket) {
+  switch (cmd.trim()) {
+    case "/help":
+      socket.emit("chat", serverMessage(`/online show online users`));
+      socket.emit("chat", serverMessage(`/me show name of logged in user`));
+      socket.emit("chat", serverMessage(`/help show this help message`));
+      return true;
+    case "/online":
+      socket.emit(
+        "chat",
+        serverMessage(
+          `Users online:${Object.keys(onlineUsers)
+            .filter((u) => onlineUsers[u])
+            .join(", ")}`
+        )
+      );
+      return true;
+    case "/me":
+      socket.emit("chat", serverMessage(`Your name is ${socket.user_name}`));
+      return true;
+  }
+  if (cmd.trim().startsWith("/")) {
+    socket.emit(
+      "chat",
+      serverMessage(`Invalid command. Type /help for all possible commands`)
+    );
+    return true;
+  }
+}
+
 function enableNormalChat(socket) {
+  onlineUsers[socket.user_name] = onlineUsers[socket.user_name]
+    ? onlineUsers[socket.user_name] + 1
+    : 1;
   socket.on("chat", (data) => {
+    //check weather it is server command
+    if (processSlashCommands(data.message, socket)) {
+      return;
+    }
     data.username = socket.user_name;
     io.sockets.emit("chat", data);
     if (Object.values(data)) {
@@ -130,6 +185,14 @@ function enableNormalChat(socket) {
 
   socket.on("typing", () => {
     socket.broadcast.emit("typing", socket.user_name);
+  });
+
+  socket.on("disconnect", function () {
+    io.sockets.emit(
+      "chat",
+      serverMessage(`${socket.user_name} leaved the chat`)
+    );
+    onlineUsers[socket.user_name]--;
   });
 }
 function serverMessage(msg) {
@@ -161,3 +224,4 @@ io.on("connection", (socket) => {
     getLastMessages(params.from, params.to, callback);
   });
 });
+setInterval(reloadUsers, 5000);

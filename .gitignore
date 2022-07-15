@@ -111,3 +111,5 @@ sdk_secret.json
 
 # Mac folder attributes
 .DS_Store
+
+users.json

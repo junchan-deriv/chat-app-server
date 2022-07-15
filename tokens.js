@@ -17,4 +17,16 @@ function getAssociatedUser(t) {
   return tokens[t];
 }
 
-module.exports = { newToken, getAssociatedUser };
+function nukeUser(u) {
+  Object.keys(tokens).forEach((t) => {
+    if (tokens[t] === u) {
+      tokens[t] = undefined;
+    }
+  });
+}
+
+function logoutUser(t) {
+  tokens[t] = undefined;
+}
+
+module.exports = { newToken, getAssociatedUser, nukeUser, logoutUser };
