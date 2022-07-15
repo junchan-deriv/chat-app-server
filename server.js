@@ -78,10 +78,7 @@ ${form}
 
 app.use((req, res, next) => {
   if (!req.session.user) {
-    res
-      .status(401)
-      .type("html")
-      .end('Fuck off, you are an unauthorized shit; <a href="/">Retry</a>');
+    res.status(401).type("html").end('Unauthorized <a href="/">Retry</a>');
     return;
   }
   next();
